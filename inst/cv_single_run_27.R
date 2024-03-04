@@ -6,12 +6,10 @@ library(purrr)
 library(MOTRbart)
 library(doParallel)
 library(tidyverse)
-# source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
-# source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
-# devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
-source("R/sim_functions_27.R")
-source("R/main_function_27.R")
-devtools::load_all()
+source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
+source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
+devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
+
 
 # Simulation arguments
 set.seed(42)
@@ -23,13 +21,13 @@ n_rep_ <- 10
 # (1): "oned_break" one dimensionnal sin(2*x) with a break
 # (2): "friedman_nointer_nonoise": four-dimensional friedmna setting with no interaction terms and no extra X noise variables
 # (3): "interaction
-type_ <- c("friedman_break")
+# type_ <- c("friedman_break")
 # type_ <- c("friedman")
 # type_ <- "smooth.main.formula"
 # type_ <- "non.smooth.main.formula"
 # type_ <- "non.and.smooth.main.formula"
 # type_ <- 'mlbench.d1.break'
-# type_ <- "airquality"
+type_ <- "airquality"
 # ================
 # Printing message
 # ================
@@ -107,11 +105,15 @@ for( i in 1:n_rep_){
     train <- data_
 
     # Creating a fine grid for the test
-    rad_grid <- seq(min(data_$Solar.R)*0.9,max(data_$Solar.R)*0.9, length.out = 300)
-    temp_grid <- seq(min(data_$Temp)*0.9, max(data_$Temp)*0.9, length.out = 300)
-    wind_grid <- seq(min(data_$Wind)*0.9, max(data_$Wind)*0.9, length.out = 300)
-    y_test_random <- rnorm(n = 300)
-    test <- data.frame(y_test_random,rad_grid,wind_grid,temp_grid)
+    rad_grid <- seq(min(data_$Solar.R)*0.9,max(data_$Solar.R)*0.9, length.out = 25)
+    temp_grid <- seq(min(data_$Temp)*0.9, max(data_$Temp)*0.9, length.out = 25)
+    wind_grid <- seq(min(data_$Wind)*0.9, max(data_$Wind)*0.9, length.out = 25)
+    grid_temp_wind <- expand.grid(wind_grid,temp_grid)
+    rad_rand <- runif(n = nrow(grid_temp_wind),min = 0.9* min(data_$Solar.R),
+                      max = 0.9*max(data_$Solar.R))
+
+    y_test_random <- rnorm(n = nrow(grid_temp_wind))
+    test <- data.frame(y_test_random,rad_rand,grid_temp_wind)
     colnames(test) <- colnames(train)
   }
 
@@ -133,7 +135,7 @@ x_train <- selected_train[,colnames(sim_train)!="y"]
 x_test <- selected_test[,colnames(sim_train)!="y"]
 y_train <- selected_train$y
 y_test <- selected_test$y
-n_tree <- 5
+n_tree <- 3
 n_mcmc <- 10000
 n_burn <- 5000
 alpha <- 0.5
@@ -213,7 +215,7 @@ rsp_mod <- rspBART(x_train = x_train,
 
 
 
-saveRDS(object = rsp_mod,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_run/v31_grid_single_run_rep_",
+saveRDS(object = rsp_mod,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_run/v31_grid2_single_run_rep_",
                                        selected_rep_,"_n_",n_,
                                       "_sd_",sd_,"_nIknots_",nIknots,"_ntree_",n_tree,"_nodesize_",node_min_size,
                                       "_dif_",dif_order,"_scale_",scale_bool,"_sc_basis_",scale_basis_function,

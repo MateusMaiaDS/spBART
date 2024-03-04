@@ -8,17 +8,17 @@ library(mlbench)
 library(purrr)
 library(MOTRbart)
 library(doParallel)
-devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART26/")
-source("/users/research/mmarques/spline_bart_lab/rspBART26/R/sim_functions_26.R")
-source("/users/research/mmarques/spline_bart_lab/rspBART26/R/main_function_26.R")
+devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
+source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
+source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
 
 # Setting the seed
-seed_ <- 42
+seed_ <- 43
 set.seed(seed_)
 competitors_only <- FALSE
 
 # Setting the data
-airquality <- read_csv("/users/research/mmarques/spline_bart_lab/rspBART26/inst/airquality/airquality.csv")
+airquality <- read_csv("/users/research/mmarques/spline_bart_lab/rspBART27/inst/airquality/airquality.csv")
 # Removing the NA columns
 airquality <- airquality[complete.cases(airquality),]
 
@@ -28,10 +28,10 @@ data_ <- airquality %>% dplyr::select(Ozone,Solar.R,Wind,Temp) %>% dplyr::mutate
 
 n_rep_ <- 10
 nIknots_ <- 20
-ntree_ <- 10
+ntree_ <- 3
 dif_order_ <- 2
 use_bs_ <- FALSE
-seed_ <- 42
+# seed_ <- 42
 y_scale_ <- TRUE
 motr_bart_ <- FALSE
 all_ <- FALSE
@@ -63,20 +63,27 @@ cv_ <- vector("list", n_rep_)
 cv_<- kfold(data_ = data_,nfold_ = n_rep_,seed_ = seed_)
 
 # Setting up the parallel simulation
-number_cores <- n_rep_
-cl <- parallel::makeCluster(number_cores)
-doParallel::registerDoParallel(cl)
+if(competitors_only){
+  number_cores <- n_rep_
+  cl <- parallel::makeCluster(number_cores)
+  doParallel::registerDoParallel(cl)
+}
 
+if(isFALSE(competitors_only)){
+i <- rep <- 10
+print(paste0("Rep: ",i))
+}
+
+if(isFALSE(competitors_only)){
 
 # Testing the simple n_tree
-result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
+# result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
 
-  devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART26/")
-  source("/users/research/mmarques/spline_bart_lab/rspBART26/R/sim_functions_26.R")
-  source("/users/research/mmarques/spline_bart_lab/rspBART26/R/main_function_26.R")
-  source("/users/research/mmarques/spline_bart_lab/rspBART26/R/cv_functions.R")
+  devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
+  source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
+  source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
+  source("/users/research/mmarques/spline_bart_lab/rspBART27/R/cv_functions.R")
 
-  if(isFALSE(competitors_only)){
     aux <- all_spbart_lite_interaction(cv_element = cv_[[i]],
                                        nIknots_ = nIknots_,ntree_ = ntree_,
                                        node_min_size_ = node_min_size_,
@@ -86,27 +93,39 @@ result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dp
                                        y_scale_ = y_scale_,
                                        n_mcmc_ = n_mcmc_,n_burn_ = n_burn_,
                                        pen_basis_ = pen_basis_)
-  } else {
-    aux <- competitors_comparison_(cv_element= cv_[[i]],
-                                   fold_ = i,seed_ = seed_,
-                                   return_models = FALSE)
+
+
+# stopCluster(cl)
+
+} else {
+
+
+  # Testing the simple n_tree
+  result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
+
+    devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
+    source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
+    source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
+    source("/users/research/mmarques/spline_bart_lab/rspBART27/R/cv_functions.R")
+
+      aux <- competitors_comparison_(cv_element= cv_[[i]],
+                                     fold_ = i,seed_ = seed_,
+                                     return_models = FALSE)
+
+      aux
   }
-  # }
 
-  aux
+
+  stopCluster(cl)
 }
-
-
-stopCluster(cl)
-
-
 
 
 # Saving the plots
 if(competitors_only){
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART26/",type_,"/competitors_seed_",seed_,".Rds"))
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/competitors_seed_",seed_,".Rds"))
 } else {
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART26/",type_,"/v31_intercept_psBART_seed_",seed_,
+  saveRDS(object = aux,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,
+                                     "/v31_rep_",rep,"_intercept_psBART_seed_",seed_,
                                         "_nIknots_",nIknots_,"_ntree_",ntree_,
                                         "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
                                         "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))

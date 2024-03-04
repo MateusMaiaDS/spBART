@@ -137,6 +137,7 @@ rspBART <- function(x_train,
   for(i in 1:ncol(x_train_scale)){
 
     if(nrow(x_train_scale)<numcut){
+      xcut_m <- matrix(NA,nrow = nrow(x_train_scale),ncol = ncol(x_train_scale))
       xcut_m[,i] <- sort(x_train_scale[,i])
     } else {
       xcut_m[,i] <- seq(min(x_train_scale[,i]),

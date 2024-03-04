@@ -5,13 +5,13 @@ library(mlbench)
 library(purrr)
 library(MOTRbart)
 library(doParallel)
-source("/users/research/mmarques/spline_bart_lab/rspBART26/R/sim_functions_26.R")
-source("/users/research/mmarques/spline_bart_lab/rspBART26/R/main_function_26.R")
+source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
+source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
 set.seed(42)
-competitors_only <- TRUE
+competitors_only <- FALSE
 
 
-n_ <- 1000
+n_ <- 250
 sd_ <- 1
 n_rep_ <- 10
 nIknots_ <- 20
@@ -26,17 +26,17 @@ alpha_ <- 0.5
 stump_ <- FALSE
 scale_init_ <- FALSE
 update_tau_beta_ <- TRUE
-node_min_size_ <- 50
-n_mcmc_ <- 5000
-n_burn_ <- 3000
+node_min_size_ <- 25
+n_mcmc_ <- 10000
+n_burn_ <- 5000
 pen_basis_ <- TRUE
 
 # Selecting a simulated scenarion
 # (1): "oned_break" one dimensionnal sin(2*x) with a break
 # (2): "friedman_nointer_nonoise": four-dimensional friedmna setting with no interaction terms and no extra X noise variables
 # (3): "interaction
-type_ <- c("friedman")
-# type_ <- c("friedman_break")
+# type_ <- c("friedman")
+type_ <- c("friedman_break")
 # type_ <- "smooth.main.formula"
 # type_ <- "non.smooth.main.formula"
 # type_ <- "non.and.smooth.main.formula"
@@ -51,6 +51,7 @@ print(paste0("N: ",n_," SD: ", sd_, " nIknots: ", nIknots_,
              "Update \tau_\beta: ", update_tau_beta_, "_type_", type_,
              "_nmcmc_",n_mcmc_, "_nburn_",n_burn_))
 
+print(paste0("Node min size:", node_min_size_))
 
 cv_ <- vector("list", n_rep_)
 
@@ -119,51 +120,56 @@ for( i in 1:n_rep_){
 }
 
 # Setting up the parallel simulation
-number_cores <- n_rep_
-cl <- parallel::makeCluster(number_cores)
-doParallel::registerDoParallel(cl)
+# number_cores <- n_rep_
+# cl <- parallel::makeCluster(number_cores)
+# doParallel::registerDoParallel(cl)
 
 
 # Testing the simple n_tree
-result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
+# result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
 
-  devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART26/")
-  source("/users/research/mmarques/spline_bart_lab/rspBART26/R/sim_functions_26.R")
-  source("/users/research/mmarques/spline_bart_lab/rspBART26/R/main_function_26.R")
-  source("/users/research/mmarques/spline_bart_lab/rspBART26/R/cv_functions.R")
+# Selecting the repetition that is going to be chosen
+rep_ <- i_ <- 10
+print(paste0("Repetition: ",rep_))
+
+  devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
+  source("/users/research/mmarques/spline_bart_lab/rspBART27/R/sim_functions_27.R")
+  source("/users/research/mmarques/spline_bart_lab/rspBART27/R/main_function_27.R")
+  source("/users/research/mmarques/spline_bart_lab/rspBART27/R/cv_functions.R")
 
   if(isFALSE(competitors_only)){
     aux <- all_spbart_lite_interaction(cv_element = cv_[[i]],
-                         nIknots_ = nIknots_,ntree_ = ntree_,
-                         node_min_size_ = node_min_size_,
-                         seed_ = seed_,
-                         alpha_ = alpha_,
-                         j = i,dif_order_ = dif_order_,
-                         y_scale_ = y_scale_,
-                         n_mcmc_ = n_mcmc_,n_burn_ = n_burn_,
-                         pen_basis_ = pen_basis_)
+                                       nIknots_ = nIknots_,ntree_ = ntree_,
+                                       node_min_size_ = node_min_size_,
+                                       seed_ = seed_,
+                                       alpha_ = alpha_,
+                                       j = i,dif_order_ = dif_order_,
+                                       y_scale_ = y_scale_,
+                                       n_mcmc_ = n_mcmc_,n_burn_ = n_burn_,
+                                       pen_basis_ = pen_basis_)
   } else {
-    aux <- competitors_comparison_(cv_object_fold_ = cv_[[i]],
+    aux <- competitors_comparison_(cv_element =  cv_[[i]],
                                    fold_ = i,seed_ = seed_,
                                    return_models = FALSE)
   }
   # }
 
   aux
-}
+# }
 
 
-stopCluster(cl)
+# stopCluster(cl)
 
 
 
 
 # Saving the plots
 if(competitors_only){
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART26/",type_,"/competitors_n_",n_,
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/competitors_n_",n_,
                                         "_sd_",sd_,".Rds"))
 } else {
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART26/",type_,"/v31_intercept_psBART_n_",n_,
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/v31_",rep_,"intercept_psBART_",
+                                        "_seed_",seed_,"_n_",n_,
                                         "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,
                                         "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
                                         "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
