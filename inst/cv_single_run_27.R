@@ -22,12 +22,12 @@ n_rep_ <- 10
 # (2): "friedman_nointer_nonoise": four-dimensional friedmna setting with no interaction terms and no extra X noise variables
 # (3): "interaction
 # type_ <- c("friedman_break")
-# type_ <- c("friedman")
+type_ <- c("friedman")
 # type_ <- "smooth.main.formula"
 # type_ <- "non.smooth.main.formula"
 # type_ <- "non.and.smooth.main.formula"
 # type_ <- 'mlbench.d1.break'
-type_ <- "airquality"
+# type_ <- "airquality"
 # ================
 # Printing message
 # ================
@@ -135,7 +135,7 @@ x_train <- selected_train[,colnames(sim_train)!="y"]
 x_test <- selected_test[,colnames(sim_train)!="y"]
 y_train <- selected_train$y
 y_test <- selected_test$y
-n_tree <- 3
+n_tree <- 10
 n_mcmc <- 10000
 n_burn <- 5000
 alpha <- 0.5

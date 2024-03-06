@@ -118,6 +118,125 @@ all_spbart_lite_interaction <- function(cv_element,
 
 
 
+# All BART-lite interaction
+all_spbart_lite_interaction_return_model <- function(cv_element,
+                                        nIknots_,
+                                        node_min_size_,
+                                        ntree_,
+                                        seed_,
+                                        j,
+                                        alpha_,
+                                        dif_order_,
+                                        y_scale_,
+                                        n_mcmc_,
+                                        n_burn_,
+                                        pen_basis_){
+
+  # Doing a warming for the case whichI don't have
+  # if(ntree_<50){
+  #   stop("Use the all_bart() function instead.")
+  # }
+
+  if(length(cv_element)==7){
+    kfold_bool <- TRUE
+    main_effects_pred_ <- FALSE
+  } else {
+    kfold_bool <- FALSE
+    main_effects_pred_ <- TRUE
+  }
+  # To replicate the results
+  set.seed(seed_)
+
+  if(kfold_bool){
+
+    train <- cv_element$data_train
+    test <- cv_element$data_test
+    x_train <- cv_element$x_train
+    x_test <- cv_element$x_test
+    y_train <- cv_element$y_train
+    y_test <- cv_element$y_test
+
+  } else {
+    train <- cv_element$train
+    test <- cv_element$test
+
+    # Getting the training elements
+    x_train <- train[, colnames(train)!="y", drop = FALSE]
+    x_test <- test[, colnames(train)!="y", drop = FALSE]
+    y_train <- train %>% dplyr::pull("y")
+    y_test <- test %>% dplyr::pull("y")
+  }
+
+
+  # Initialising df
+  comparison_metrics <- data.frame(metric = NULL, value = NULL, model = NULL,fold = NULL)
+
+
+  spBART_interaction <- rspBART(x_train = x_train,
+                                x_test = x_test,y_train = y_train,
+                                n_mcmc = n_mcmc_,node_min_size = node_min_size_,
+                                alpha = alpha_,
+                                n_burn = 0,nIknots = nIknots_,n_tree = ntree_,
+                                use_bs = FALSE,all_var = FALSE,
+                                stump = FALSE,dif_order = dif_order_,scale_bool = y_scale_,
+                                motrbart_bool = FALSE,
+                                scale_init = FALSE,
+                                interaction_term = TRUE,
+                                main_effects_pred = main_effects_pred_,
+                                update_tau_beta = TRUE,
+                                linero_sampler = FALSE,plot_preview = FALSE,
+                                use_D_bool = FALSE,scale_basis_function = FALSE,
+                                store_tree_fit = FALSE,varimportance_bool = TRUE,
+                                robust_prior = FALSE,pen_basis = pen_basis_,eta = 1e-6,
+                                center_basis = TRUE)
+
+
+  n_burn_ <- n_burn_
+  n_mcmc_ <- spBART_interaction$mcmc$n_mcmc
+
+  # Calculating metrics for splinesBART
+  comparison_metrics <- rbind(comparison_metrics,data.frame(metric = "rmse_train",
+                                                            value = rmse(x = colMeans(spBART_interaction$y_train_hat[(n_burn_+1):n_mcmc_,,drop = FALSE]),
+                                                                         train$y),
+                                                            model = "psBART",fold = j))
+
+  comparison_metrics <- rbind(comparison_metrics,data.frame(metric = "rmse_test",
+                                                            value = rmse(x = colMeans(spBART_interaction$y_test_hat[(n_burn_+1):n_mcmc_,,drop = FALSE]),
+                                                                         test$y),
+                                                            model = "psBART",fold = j))
+
+  # Calculating metrics for splinesBART
+  comparison_metrics <- rbind(comparison_metrics,data.frame(metric = "mae_train",
+                                                            value = mae(x = colMeans(spBART_interaction$y_train_hat[(n_burn_+1):n_mcmc_,,drop = FALSE]),
+                                                                        train$y),
+                                                            model = "psBART",fold = j))
+
+  comparison_metrics <- rbind(comparison_metrics,data.frame(metric = "mae_test",
+                                                            value = mae(x = colMeans(spBART_interaction$y_test_hat[(n_burn_+1):n_mcmc_,,drop = FALSE]),
+                                                                        test$y),
+                                                            model = "psBART",fold = j))
+
+
+  # Calculating the CRPS as well
+  comparison_metrics <- rbind(comparison_metrics,data.frame(metric = "crps_train",
+                                                            value = crps(y = train$y ,
+                                                                         means = colMeans(spBART_interaction$y_train_hat[(n_burn_+1):n_mcmc_,,drop = FALSE]),
+                                                                         sds = rep(mean(spBART_interaction$all_tau[(n_burn_+1):n_mcmc_])^(-1/2), length(train$y)))$CRPS,
+                                                            model = "psBART",fold = j))
+
+  comparison_metrics <- rbind(comparison_metrics,data.frame(metric = "crps_test",
+                                                            value = crps(y = test$y ,
+                                                                         means = colMeans(spBART_interaction$y_test_hat[(n_burn_+1):n_mcmc_,,drop = FALSE]),
+                                                                         sds = rep(mean(spBART_interaction$all_tau[(n_burn_+1):n_mcmc_])^(-1/2), length(test$y)))$CRPS,
+                                                            model = "psBART",fold = j))
+
+
+  return(list(comparison_metrics = comparison_metrics,
+              rsp_mod = spBART_interaction))
+
+}
+
+
 # Summarising all the metrics and results
 wrapping_comparison <- function(result_){
 

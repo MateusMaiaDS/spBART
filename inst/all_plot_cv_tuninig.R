@@ -22,7 +22,7 @@ n_ <- 1000
 ntree_ <- 10
 type_ <- "friedman_break"
 nIknots_ <- 20
-node_min_size_ <- 25
+node_min_size_ <- 50
 n_mcmc_ <- 5000
 n_burn_ <- 3000
 dif_order_ <- 2
@@ -36,21 +36,21 @@ all_boxplot_df <- data.frame(metric = NULL,
                              fold = NULL,
                              n = NULL)
 for(jj in n_vector){
-rps_bart_result <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART24/",type_,"/",
-"v28_psBART_n_",jj,"_sd_1_nIknots_",nIknots_,"_ntree_",ntree_,"_alpha_0.5_dif_",dif_order_,"_nmin_",node_min_size_,
+rps_bart_result <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART27/",type_,"/",
+"v31_intercept_psBART_n_",jj,"_sd_1_nIknots_",nIknots_,"_ntree_",ntree_,"_alpha_0.5_dif_",dif_order_,"_nmin_",node_min_size_,
 "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
 rps_bart_df <- rps_bart_result %>% do.call(rbind,.) %>% mutate(n = jj)
 
-rps_bart_result_old <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART23/",type_,"/",
-                                  "v28_psBART_n_",jj,"_sd_1_nIknots_",nIknots_,"_ntree_",ntree_,"_alpha_0.5_dif_",dif_order_,"_nmin_",node_min_size_,
-                                  "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
-rps_bart_df_old <- rps_bart_result_old %>% do.call(rbind,.) %>% mutate(n = jj) %>% mutate(model = "psBART_old")
+# rps_bart_result_old <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART23/",type_,"/",
+#                                   "v28_psBART_n_",jj,"_sd_1_nIknots_",nIknots_,"_ntree_",ntree_,"_alpha_0.5_dif_",dif_order_,"_nmin_",node_min_size_,
+#                                   "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
+# rps_bart_df_old <- rps_bart_result_old %>% do.call(rbind,.) %>% mutate(n = jj) %>% mutate(model = "psBART_old")
 
 # Retrieving the results from its cmpetitors
-competitors_result <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART24/",type_,"/competitors_n_",jj,"_sd_1.Rds"))
+competitors_result <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART27/",type_,"/competitors_n_",jj,"_sd_1.Rds"))
 competitors_df <- do.call(rbind,competitors_result) %>% do.call(rbind,.) %>% mutate(n = jj)
 
-all_boxplot_df <- rbind(all_boxplot_df,rps_bart_df,competitors_df,rps_bart_df_old)
+all_boxplot_df <- rbind(all_boxplot_df,rps_bart_df,competitors_df)
 }
 
 all_boxplot_df <- all_boxplot_df %>%

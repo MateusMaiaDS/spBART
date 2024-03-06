@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyverse)
 devtools::load_all(path = "/users/research/mmarques/spline_bart_lab/rspBART27/")
 # rsp_mod <- readRDS("~/spline_bart_lab/preliminar_results/rspBART17/friedman/single_run/v20_single_run_rep_1_n_250_sd_1_nIknots_2_ntree_20_nodesize_15_dif_1_scale_TRUE_sc_basis_TRUE_nmcmc_5000_nburn_2500_rb_prior_FALSE.Rds")
-type_ <- "friedman_break"
+type_ <- "friedman"
 
 # Main effect range difference
 main_effects_train_list_norm <- rsp_mod$mcmc$main_effects_train
@@ -85,7 +85,8 @@ for(jj in 1:(NCOL(x_train)+1)){
 
 
 par(mfrow=c(1,2))
-burn_sample_ <- rsp_mod$mcmc$n_burn
+burn_sample_ <- 8000
+n_mcmc <- 10000
 all_tau_beta <- rsp_mod$all_tau_beta
 variable_importance_matrix <- rsp_mod$mcmc$variable_importance_matrix
 plot(1:NCOL(variable_importance_matrix),variable_importance_matrix[burn_sample_:n_mcmc,,drop = FALSE] %>% colMeans(),

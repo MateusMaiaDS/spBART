@@ -27,16 +27,16 @@ stump_ <- FALSE
 scale_init_ <- FALSE
 update_tau_beta_ <- TRUE
 node_min_size_ <- 25
-n_mcmc_ <- 10000
-n_burn_ <- 5000
+n_mcmc_ <- 5000
+n_burn_ <- 3000
 pen_basis_ <- TRUE
 
 # Selecting a simulated scenarion
 # (1): "oned_break" one dimensionnal sin(2*x) with a break
 # (2): "friedman_nointer_nonoise": four-dimensional friedmna setting with no interaction terms and no extra X noise variables
 # (3): "interaction
-# type_ <- c("friedman")
-type_ <- c("friedman_break")
+type_ <- c("friedman")
+# type_ <- c("friedman_break")
 # type_ <- "smooth.main.formula"
 # type_ <- "non.smooth.main.formula"
 # type_ <- "non.and.smooth.main.formula"
@@ -129,7 +129,7 @@ for( i in 1:n_rep_){
 # result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
 
 # Selecting the repetition that is going to be chosen
-rep_ <- i_ <- 10
+rep_ <- i_ <- 1
 print(paste0("Repetition: ",rep_))
 
   devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
@@ -138,17 +138,17 @@ print(paste0("Repetition: ",rep_))
   source("/users/research/mmarques/spline_bart_lab/rspBART27/R/cv_functions.R")
 
   if(isFALSE(competitors_only)){
-    aux <- all_spbart_lite_interaction(cv_element = cv_[[i]],
+    aux <- all_spbart_lite_interaction_return_model(cv_element = cv_[[i_]],
                                        nIknots_ = nIknots_,ntree_ = ntree_,
                                        node_min_size_ = node_min_size_,
                                        seed_ = seed_,
                                        alpha_ = alpha_,
-                                       j = i,dif_order_ = dif_order_,
+                                       j = i_,dif_order_ = dif_order_,
                                        y_scale_ = y_scale_,
                                        n_mcmc_ = n_mcmc_,n_burn_ = n_burn_,
                                        pen_basis_ = pen_basis_)
   } else {
-    aux <- competitors_comparison_(cv_element =  cv_[[i]],
+    aux <- competitors_comparison_(cv_element =  cv_[[i_]],
                                    fold_ = i,seed_ = seed_,
                                    return_models = FALSE)
   }
@@ -160,6 +160,8 @@ print(paste0("Repetition: ",rep_))
 
 # stopCluster(cl)
 
+result <- aux$comparison_metrics
+model <- aux$rsp_mod
 
 
 
@@ -168,13 +170,18 @@ if(competitors_only){
   saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/competitors_n_",n_,
                                         "_sd_",sd_,".Rds"))
 } else {
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/v31_",rep_,"intercept_psBART_",
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/v31_rep_",rep_,"_intercept_psBART_",
+                                        "seed_",seed_,"_n_",n_,
+                                        "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,
+                                        "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
+                                        "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
+
+  saveRDS(object = model,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/model_run_v31_rep_",rep_,"_intercept_psBART_",
                                         "_seed_",seed_,"_n_",n_,
                                         "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,
                                         "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
                                         "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
+
+
+
 }
-
-
-
-
