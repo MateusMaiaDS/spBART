@@ -154,14 +154,16 @@ rspBART <- function(x_train,
   ndx <- nIknots+1
   ord_ <- 4
   degree_ <- 3
-  x_min_sp <- apply(x_train_scale,2,min)
-  x_max_sp <- apply(x_train_scale,2,max)
+  x_min_sp <- apply(rbind(x_train_scale,x_test_scale),2,min)
+  x_max_sp <- apply(rbind(x_train_scale,x_test_scale),2,max)
   dx <- (x_max_sp-x_min_sp)/ndx
 
   # Creating the knots based on the DALSM package
   new_knots <- list()
   for(i in 1:length(dummy_x$continuousVars)){
-    new_knots[[i]] <- DALSM::qknots(x = x_train_scale[,i],equid.knots = TRUE,
+    new_knots[[i]] <- DALSM::qknots(x = x_train_scale[,i],xmin = x_min_sp[i],
+                                    xmax = x_max_sp[i],
+                                    equid.knots = TRUE,
                                     pen.order = 1,K = nIknots)
   }
   # Setting the names of the basis
@@ -415,6 +417,7 @@ rspBART <- function(x_train,
   all_y_hat_test <- matrix(NA, nrow = n_mcmc, ncol = nrow(x_test_scale))
   all_trees_fit <- vector("list",n_mcmc)
   all_trees <- vector("list",n_mcmc)
+  all_trees_depth <- matrix(NA, nrow = n_mcmc, ncol = n_tree)
   forest <- vector("list",n_tree)
 
   # Partial component pieces
@@ -896,6 +899,7 @@ rspBART <- function(x_train,
     all_y_hat[i,] <- y_hat
     all_y_hat_test[i,] <- y_hat_test
     all_tau_beta[i,] <- data$tau_beta
+    all_trees_depth[i,] <- unlist(lapply(forest, length))
     # all_delta[i] <- data$delta
 
 
@@ -1178,6 +1182,7 @@ rspBART <- function(x_train,
               mcmc = list(n_mcmc = n_mcmc,
                           n_burn = n_burn,
                           all_trees = all_trees,
+                          all_trees_depth = all_trees_depth,
                           main_effects_train = main_effects_train_list_norm,
                           main_effects_test = main_effects_test_list_norm,
                           tree_main_effects = tree_main_effects,

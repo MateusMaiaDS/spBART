@@ -11,14 +11,14 @@ main_effects_test_list_norm <- rsp_mod$mcmc$main_effects_test
 tree_main_effects <- rsp_mod$mcmc$tree_main_effects
 x_train <- rsp_mod$data$x_train %>% as.matrix()
 x_test <- rsp_mod$data$x_test %>% as.matrix()
-n_mcmc <- rsp_mod$mcmc$n_mcmc
-n_burn <- rsp_mod$mcmc$n_mcmc
+n_mcmc <- 2000
+n_burn <- 1000
 
 # n_mcmc <- 9200
 # n_burn <- 5000
 
 n_tree <- rsp_mod$prior$n_tree
-n_burn_plot <- 4000
+n_burn_plot <- 1000
 par(mfrow=c(1,1))
 plot(rsp_mod$all_tau, type = 'l', main = expression(tau), ylab = expression(tau))
 plot(rsp_mod$all_tau[n_burn_plot:rsp_mod$mcmc$n_mcmc]^(-1/2), type = 'l', main = expression(tau), ylab = expression(tau))
@@ -27,9 +27,14 @@ par(mfrow = c(2,floor(NCOL(x_train)/2)))
 for(jj in 1:(NCOL(x_train)+1)){
 
   if(jj <= NCOL(x_train)){
+    if(jj == 4){
     plot(x_train[,jj],colMeans(main_effects_train_list_norm[[jj]][n_burn_plot:n_mcmc,, drop = FALSE]),main = paste0('X',jj),
-         ylab = paste0('G(X',jj,')'),pch=20,xlab = paste0('x.',jj), col = alpha("black",1.0))
+         ylab = paste0('G(X',jj,')'),ylim =c(-15,5),pch=20,xlab = paste0('x.',jj), col = alpha("black",1.0))
+    } else {
+      plot(x_train[,jj],colMeans(main_effects_train_list_norm[[jj]][n_burn_plot:n_mcmc,, drop = FALSE]),main = paste0('X',jj),
+           ylab = paste0('G(X',jj,')'),ylim =c(-15,15),pch=20,xlab = paste0('x.',jj), col = alpha("black",1.0))
 
+    }
   }    else if(jj == NCOL(x_train)+1 ) {
     par(mfrow=c(1,1))
 
@@ -85,10 +90,11 @@ for(jj in 1:(NCOL(x_train)+1)){
 
 
 par(mfrow=c(1,2))
-burn_sample_ <- 8000
-n_mcmc <- 10000
+burn_sample_ <- 3000
+n_mcmc <- 5000
 all_tau_beta <- rsp_mod$all_tau_beta
 variable_importance_matrix <- rsp_mod$mcmc$variable_importance_matrix
+
 plot(1:NCOL(variable_importance_matrix),variable_importance_matrix[burn_sample_:n_mcmc,,drop = FALSE] %>% colMeans(),
      ylab = "Prop. pred_var", xlab = "Predictor", main = c("Proportion Tree pred.vars"))
 # labels( names = c(colnames(rsp_mod$data$x_train), "solar:wind", "solar:temp","wind:temp"))
@@ -107,6 +113,16 @@ points((1:NCOL(variable_importance_matrix))[c(1:5,11)],all_tau_beta[burn_sample_
 }
 
 var_imp_mean <- variable_importance_matrix[burn_sample_:n_mcmc,,drop = FALSE] %>% colMeans()
+
+# plot(1:NCOL(rsp_mod$mcmc$variable_importance_matrix_intercept),rsp_mod$mcmc$variable_importance_matrix_intercept[burn_sample_:n_mcmc,,drop = FALSE] %>% colMeans(na.rm = TRUE),
+#      ylab = expression(bar(lambda[j])), xlab = "Predictor", main = c("Tree Split Prop."))
+# if(type_=="friedman" | type_ == "friedman_break"){
+#   points((1:NCOL(rsp_mod$mcmc$variable_importance_matrix_intercept))[c(1:5,11)],all_tau_beta[burn_sample_:n_mcmc,c(1:5,11),drop = FALSE] %>% colMeans(na.rm = TRUE),
+#          ylab = "mean_lambda_j", xlab = "Predictor/Basis", pch = 20)
+# }
+#
+# var_imp_mean <- variable_importance_matrix[burn_sample_:n_mcmc,,drop = FALSE] %>% colMeans()
+
 
 
 # rsp_mod$all_tau_beta %>% apply(2,var) %>% plot
@@ -134,3 +150,4 @@ all_tau_beta[burn_sample_:n_mcmc,,drop = FALSE] %>% apply(2,sd) %>% plot(main = 
 # points((1:NCOL(variable_importance_matrix))[c(1:5,11)],apply(all_tau_beta[burn_sample_:n_mcmc,c(1:5,11),drop = FALSE],2,sd),
 #        ylab = "mean_tau_beta", xlab = "Predictor/Basis", pch = 20)
 boxplot(all_tau_beta[(rsp_mod$mcmc$n_burn+1):n_mcmc,,drop = FALSE], ylab = expression(lambda[j]), main = expression(lambda[j]))
+

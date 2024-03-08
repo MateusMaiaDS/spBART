@@ -11,7 +11,7 @@ set.seed(42)
 competitors_only <- FALSE
 
 
-n_ <- 1000
+n_ <- 250
 sd_ <- 1
 n_rep_ <- 10
 nIknots_ <- 20
@@ -164,7 +164,7 @@ if(competitors_only){
   saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/competitors_n_",n_,
                                         "_sd_",sd_,".Rds"))
 } else {
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/v31_intercept_psBART_n_",n_,
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/v33_intercept_psBART_n_",n_,
                                         "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,
                                         "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
                                         "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))

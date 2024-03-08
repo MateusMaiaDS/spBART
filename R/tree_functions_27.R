@@ -154,7 +154,7 @@ nodeLogLike <- function(curr_part_res,
   }
 
   # Adding the main diagonal
-  cov_aux <- (diag(nrow = n_leaf) + cov_aux + data$tau/data$tau_gamma)/data$tau
+  cov_aux <- (diag(nrow = n_leaf) + cov_aux + 1/data$tau_gamma)/data$tau
 
   # Defining Keefe suggestion
   pivot_chol <- function(x) {
@@ -469,6 +469,10 @@ add_variable <- function(tree,
   g_node_name <- sample(terminal_nodes,size = 1)
   g_node <- tree[[g_node_name]]
 
+  # If there are more than 3 interactions
+  if(g_node$pred_vars>3){
+    return(tree)
+  }
 
   valid_terminal_node <- TRUE
   valid_count <- 0
@@ -512,7 +516,10 @@ add_variable <- function(tree,
                                        data = data,tree_number = tree_number)
 
   # Calculating the acceptance probability
-  acceptance <- exp(-g_loglike+new_g_loglike)
+  # assuming a prior for the regarding the number of interactions
+  prior_add <- log(0.1) - log(length(g_node$pred_vars)+1) # Assuming lambda = 0.1
+
+  acceptance <- exp(-g_loglike+new_g_loglike + prior_add)
 
 
   if(data$stump) {
@@ -671,7 +678,9 @@ remove_variable <- function(tree,
                                 data = data,tree_number = tree_number)
 
   # Calculating the acceptance probability
-  acceptance <- exp(-p_loglike+new_p_loglike)
+  prior_add <- log(0.1) - log(length(p_node$pred_vars)+1) # Assuming lambda = 0.1
+
+  acceptance <- exp(-p_loglike+new_p_loglike-prior_add)
 
 
   if(data$stump) {
@@ -1293,8 +1302,9 @@ updateGammas <- function(tree,
     n_leaf <- length(cu_t$train_index)
 
     # Calculate this first because is gonna be used in the variance term as well
-    mean_gamma_aux <- (n_leaf+data$tau_gamma/data$tau)^(-1)
-    mean_gamma <- mean_gamma_aux*(sum(curr_part_res[cu_t$train_index])-sum(basis_fit[tree_number,cu_t$train_index]))
+    mean_gamma_aux <- (n_leaf+data$tau_gamma)^(-1)
+    mean_gamma <- mean_gamma_aux*(sum(curr_part_res[cu_t$train_index])-
+                                    sum(basis_fit[tree_number,cu_t$train_index]))
     sd_gamma <- sqrt(mean_gamma_aux/data$tau)
 
     # Sampling the gamma

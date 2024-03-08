@@ -63,7 +63,7 @@ all_spbart_lite_interaction <- function(cv_element,
                                 update_tau_beta = TRUE,
                                 linero_sampler = FALSE,plot_preview = FALSE,
                                 use_D_bool = FALSE,scale_basis_function = FALSE,
-                                store_tree_fit = FALSE,varimportance_bool = TRUE,
+                                store_tree_fit = FALSE,varimportance_bool = FALSE,
                                 robust_prior = FALSE,pen_basis = pen_basis_,eta = 1e-6,
                                 center_basis = TRUE)
 

@@ -129,7 +129,7 @@ for( i in 1:n_rep_){
 # result <- foreach(i = 1:n_rep_, .packages = c("dbarts","SoftBart","MOTRbart","dplyr")) %dopar%{
 
 # Selecting the repetition that is going to be chosen
-rep_ <- i_ <- 1
+rep_ <- i_ <- 4
 print(paste0("Repetition: ",rep_))
 
   devtools::load_all("/users/research/mmarques/spline_bart_lab/rspBART27/")
@@ -170,14 +170,14 @@ if(competitors_only){
   saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/competitors_n_",n_,
                                         "_sd_",sd_,".Rds"))
 } else {
-  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/v31_rep_",rep_,"_intercept_psBART_",
+  saveRDS(object = result,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/v32_rep_",rep_,"_intercept_psBART_",
                                         "seed_",seed_,"_n_",n_,
                                         "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,
                                         "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
                                         "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
 
-  saveRDS(object = model,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/model_run_v31_rep_",rep_,"_intercept_psBART_",
-                                        "_seed_",seed_,"_n_",n_,
+  saveRDS(object = model,file = paste0("/users/research/mmarques/spline_bart_lab/preliminar_results/rspBART27/",type_,"/single_rep/model_run_v32_rep_",rep_,"_intercept_psBART_",
+                                        "seed_",seed_,"_n_",n_,
                                         "_sd_",sd_,"_nIknots_",nIknots_,"_ntree_",ntree_,
                                         "_alpha_",alpha_,"_dif_",dif_order_,"_nmin_",node_min_size_,
                                         "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))

@@ -8,8 +8,8 @@ library(mlbench)
 library(purrr)
 library(MOTRbart)
 library(doParallel)
-source("R/sim_functions.R")
-source("R/main_function.R")
+source("R/sim_functions_27.R")
+source("R/main_function_27.R")
 source("R/cv_functions.R")
 
 
@@ -20,16 +20,16 @@ source("R/cv_functions.R")
 
 n_ <- 1000
 ntree_ <- 10
-type_ <- "friedman_break"
+type_ <- "friedman"
 nIknots_ <- 20
-node_min_size_ <- 50
+node_min_size_ <- 25
 n_mcmc_ <- 5000
 n_burn_ <- 3000
 dif_order_ <- 2
 
 # Retrieving rpsBART results
 # Getting the for multiple knots
-n_vector <- c(250)
+n_vector <- c(1000)
 all_boxplot_df <- data.frame(metric = NULL,
                              value = NULL,
                              model = NULL,
@@ -37,7 +37,7 @@ all_boxplot_df <- data.frame(metric = NULL,
                              n = NULL)
 for(jj in n_vector){
 rps_bart_result <- readRDS(paste0("~/spline_bart_lab/preliminar_results/rspBART27/",type_,"/",
-"v31_intercept_psBART_n_",jj,"_sd_1_nIknots_",nIknots_,"_ntree_",ntree_,"_alpha_0.5_dif_",dif_order_,"_nmin_",node_min_size_,
+"v32_intercept_psBART_n_",jj,"_sd_1_nIknots_",nIknots_,"_ntree_",ntree_,"_alpha_0.5_dif_",dif_order_,"_nmin_",node_min_size_,
 "_nmcmc_",n_mcmc_,"_nburn_",n_burn_,".Rds"))
 rps_bart_df <- rps_bart_result %>% do.call(rbind,.) %>% mutate(n = jj)
 
