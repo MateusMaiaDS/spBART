@@ -1,12 +1,12 @@
 
-# rspBART
+# spBART
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 ## Installation
 
-You can install the development version of rspBART from [GitHub](https://github.com/) with:
+You can install the development version of spBART from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
