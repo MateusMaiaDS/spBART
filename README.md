@@ -4,8 +4,6 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of rspBART is to ...
-
 ## Installation
 
 You can install the development version of rspBART from [GitHub](https://github.com/) with:
