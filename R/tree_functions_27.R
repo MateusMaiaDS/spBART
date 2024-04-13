@@ -470,7 +470,7 @@ add_variable <- function(tree,
   g_node <- tree[[g_node_name]]
 
   # If there are more than 3 interactions
-  if(g_node$pred_vars>3){
+  if(length(g_node$pred_vars)>3){
     return(tree)
   }
 

@@ -21,8 +21,8 @@ rspBART <- function(x_train,
                     sigquant = 0.9,
                     kappa = 2,
                     # Splines parameters
-                    nIknots = 3,
-                    dif_order = 1,
+                    nIknots = 10,
+                    dif_order = 2,
                     tau = 100,
                     scale_bool = TRUE,
                     stump = FALSE,
@@ -1042,14 +1042,14 @@ rspBART <- function(x_train,
   # Quick check over the RMSE
   if(plot_preview){
     # par(mrow=c(1,3))
-    rmse(all_y_hat_test_norm[1:i,] %>% colMeans(na.rm = TRUE), y = sim_test$y)
+    rmse(colMeans(all_y_hat_test_norm[1:i,],na.rm = TRUE), y = sim_test$y)
     rmse(sim_test$y, aux$yhat.test.mean)
     rmse(sim_test$y, aux2$y_hat_test_mean)
 
     # Getting some plots
     par(mfrow=c(1,3))
-    plot(all_y_hat_test_norm[2000:i,] %>% colMeans(na.rm = TRUE), y = sim_test$y,
-         xlab = "spBART_test", ylab = "y_test", main = "spBART")
+    # plot(all_y_hat_test_norm[2000:i,] %>% colMeans(na.rm = TRUE), y = sim_test$y,
+    #      xlab = "spBART_test", ylab = "y_test", main = "spBART")
     plot(sim_test$y, aux$yhat.test.mean,
          xlab = "BART_test", ylab = "y_test", main = "BART")
     plot(sim_test$y, aux2$y_hat_test_mean,
@@ -1057,22 +1057,22 @@ rspBART <- function(x_train,
   }
 
 
-  # Plotting vaiable importance
-  if(plot_preview){
-    par(mfrow=c(1,2))
-    burn_sample_ <- 100
-    plot(1:NCOL(variable_importance_matrix),variable_importance_matrix[burn_sample_:i,,drop = FALSE] %>% colMeans(),
-         ylab = "Prop. pred_var", xlab = "Predictor", main = c("Proportion Tree pred.vars"))
-    points((1:NCOL(variable_importance_matrix))[c(1:5,11)],variable_importance_matrix[burn_sample_:i,c(1:5,11),drop = FALSE] %>% colMeans(),
-         ylab = "Prop. pred_var", xlab = "Predictor/Basis", pch = 20)
-
-
-    plot(1:NCOL(variable_importance_matrix),all_tau_beta[burn_sample_:i,,drop = FALSE] %>% colMeans(na.rm = TRUE),
-         ylab = expression(bar(tau[beta])), xlab = "Predictor", main = c("Tau_beta_posterior_mean"))
-    points((1:NCOL(variable_importance_matrix))[c(1:5,11)],all_tau_beta[burn_sample_:i,c(1:5,11),drop = FALSE] %>% colMeans(na.rm = TRUE),
-           ylab = "mean_tau_beta", xlab = "Predictor/Basis", pch = 20)
-
-  }
+  # # Plotting vaiable importance
+  # if(plot_preview){
+  #   par(mfrow=c(1,2))
+  #   burn_sample_ <- 100
+  #   plot(1:NCOL(variable_importance_matrix),variable_importance_matrix[burn_sample_:i,,drop = FALSE] %>% colMeans(),
+  #        ylab = "Prop. pred_var", xlab = "Predictor", main = c("Proportion Tree pred.vars"))
+  #   points((1:NCOL(variable_importance_matrix))[c(1:5,11)],variable_importance_matrix[burn_sample_:i,c(1:5,11),drop = FALSE] %>% colMeans(),
+  #        ylab = "Prop. pred_var", xlab = "Predictor/Basis", pch = 20)
+  #
+  #
+  #   plot(1:NCOL(variable_importance_matrix),all_tau_beta[burn_sample_:i,,drop = FALSE] %>% colMeans(na.rm = TRUE),
+  #        ylab = expression(bar(tau[beta])), xlab = "Predictor", main = c("Tau_beta_posterior_mean"))
+  #   points((1:NCOL(variable_importance_matrix))[c(1:5,11)],all_tau_beta[burn_sample_:i,c(1:5,11),drop = FALSE] %>% colMeans(na.rm = TRUE),
+  #          ylab = "mean_tau_beta", xlab = "Predictor/Basis", pch = 20)
+  #
+  # }
   # importance_var_ <- variable_importance_matrix[501:i,,drop = FALSE] %>% colMeans()
 
   # plot(1:55,log((importance_var_*tau_beta_post_mean_)/sum(importance_var_*tau_beta_post_mean_)))
